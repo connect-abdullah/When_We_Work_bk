@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "whenwework-bk"
+version = "0.1.0"
+description = ""
+authors = ["M Abdullah <insights.abdullah@gmail.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "*"
+sqlalchemy = "*"
+alembic = "*"
+psycopg2-binary = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
