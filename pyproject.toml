@@ -12,6 +12,7 @@ fastapi = "*"
 sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
+pydantic = "^2.12.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

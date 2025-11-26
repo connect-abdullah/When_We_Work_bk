@@ -13,7 +13,7 @@ class Gender(str, Enum):
     FEMALE = "female"
     OTHER = "other"
 
-class Workers(Base, BaseModel):
+class Staff(Base, BaseModel):
     __tablename__ = "staff"
     
     first_name = Column(String, nullable=False)
@@ -26,7 +26,7 @@ class Workers(Base, BaseModel):
     gender = Column(SQLAEnum(Gender), nullable=False)
     
     role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.STAFF)
-    provider = Column(String, nullable=True) # foriegn key of admin.id
+    provider = Column(String, nullable=False) # foriegn key of admin.id
     
     active_jobs = Column(Array(Integer), nullable=True)
     total_jobs = Column(Array(String), nullable=True)
