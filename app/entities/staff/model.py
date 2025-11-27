@@ -31,4 +31,4 @@ class Staff(Base, BaseModel):
     active_jobs = Column(Array(Integer), nullable=True)
     total_jobs = Column(Array(String), nullable=True)
     
-    
+    admin_id = Column(Integer, nullable=False)
