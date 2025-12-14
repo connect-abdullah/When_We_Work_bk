@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
 
 class UserRoleEnum(str, Enum):
-    ADMIN = "admin"         # System admin - can create jobs and appoint staff
-    STAFF = "staff"         # Staff - can apply for jobs
+    ADMIN = "admin"         # System admin - can create jobs and appoint workers
+    WORKER = "worker"         # Worker - can apply for jobs
 
 class Gender(str, Enum):
     MALE = "male"
@@ -17,6 +17,7 @@ class Admin(Base, BaseModel):
     __tablename__ = "admin"
     
     first_name = Column(String, nullable=False)
+    middle_name = Column(String, nullable=True)
     last_name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     phone = Column(String, nullable=False)

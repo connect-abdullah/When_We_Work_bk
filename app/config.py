@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
 class DatabaseSettings(BaseModel):
-    url: str = Field(default="postgresql+asyncpg://pms_user:pms_password@localhost:5432/pms_db")
+    url: str = Field(default="")
     echo: bool = Field(default=False)
     pool_size: int = Field(default=5)
     max_overflow: int = Field(default=10)
@@ -27,28 +27,16 @@ class Settings(BaseSettings):
     )
     
     # Application
-    app_name: str = Field(default="Booklee Backend API")
+    app_name: str = Field(default="WhenWeWork Backend API")
     version: str = Field(default="1.0.0")
-    description: str = Field(default="Booklee Backend API")
+    description: str = Field(default="WhenWeWork Backend API")
     debug: bool = Field(default=True)
     environment: str = Field(default="development")
     
     # API
     api_v1_str: str = Field(default="/api/v1")
     
-    # Database
-    POSTGRES_USER: str | None = os.getenv("POSTGRES_USER")
-    POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD")
-    POSTGRES_HOST: str | None = os.getenv("POSTGRES_HOST")
-    POSTGRES_PORT: str | None = os.getenv("POSTGRES_PORT")
-    POSTGRES_DB: str | None = os.getenv("POSTGRES_DB")
-    # DATABASE_URL: str = (
-    #     f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
-    # )
-    DATABASE_URL: str ="postgresql+psycopg2://postgres.oodnxcwtaiwpjtodxjwf:QhIuYFoSVV1yZI0y@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
-  
-    
-    # Auth
+
     secret_key: str = Field(default="your-secret-key-here-change-in-production")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30)

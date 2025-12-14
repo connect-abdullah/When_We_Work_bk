@@ -1,8 +1,8 @@
-from app.db.base import Base # re-export Base for model metadata discovery if needed
+from app.db.base import Base # This re-exports Base from app.db.base so it can be imported from app.entities instead of app.db.base.
 
-from app.entities.staff.model import Staff
+from app.entities.workers.model import Worker
 
 __all__ = [
     "Base",
-    "Staff"
+    "Worker"
 ]

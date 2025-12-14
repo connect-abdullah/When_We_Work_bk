@@ -23,7 +23,7 @@ try:
         # Local connection optimization
         connect_args={
             "connect_timeout": 5,
-            "application_name": "regel_backend_local",
+            "application_name": "whenwework_backend_local",
         },
         
         # Performance settings
