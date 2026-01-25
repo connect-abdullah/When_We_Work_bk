@@ -1,16 +1,23 @@
-FROM python:3.10-alpine AS base
+FROM python:3.12-alpine AS base
 
 WORKDIR /app
 
-COPY poetry.lock pyproject.toml ./
+# Install system dependencies
+RUN apk add --no-cache gcc musl-dev curl
 
-RUN apk add --no-cache gcc musl-dev
+# Install poetry 
+RUN pip install --upgrade pip && pip install poetry
+
+# Configure poetry
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction --no-ansi
+
+COPY poetry.lock pyproject.toml README.md ./
+
+RUN poetry install --no-interaction --no-ansi --no-root
 
 COPY . .
 
 EXPOSE 8000
 COPY scripts/script.sh ./scripts/script.sh
 
-CMD ["bin/bash", "scripts/script.sh"]`
+CMD ["/bin/sh", "scripts/script.sh"]`
