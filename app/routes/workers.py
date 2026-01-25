@@ -19,7 +19,7 @@ def create_worker(worker: WorkerCreate, db: Session = Depends(get_db)):
         new_worker = WorkerService(db).create_worker(worker)
         return ok(data=new_worker, message="Worker Created Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
 
 # Get all workers
 @router.get("", response_model=APIResponse[WorkerRead])
@@ -29,7 +29,7 @@ def get_workers(admin_id: int, db: Session = Depends(get_db)):
         all_workers = WorkerService(db).get_all_workers(admin_id=admin_id)
         return ok(data=all_workers, message="Workers Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
 
 # Get worker by id
 @router.get("/{worker_id}", response_model=APIResponse[WorkerRead])
@@ -39,7 +39,7 @@ def get_worker_by_id(worker_id: int, db: Session = Depends(get_db)):
         worker = WorkerService(db).get_worker_by_id(worker_id=worker_id)
         return ok(data=worker, message="Worker Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Update worker
 @router.put("/{worker_id}",response_model=APIResponse[WorkerRead])
@@ -54,7 +54,7 @@ def update_worker(worker_id: int, worker: WorkerUpdate, db: Session = Depends(ge
             )
         return ok(data=updated_worker, message="Worker Updated Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Delete Worker
 @router.delete("/{worker_id}", response_model=APIResponse[dict])
@@ -69,4 +69,4 @@ def delete_worker(worker_id: int, db: Session = Depends(get_db)):
             )
         return ok(data=deleted_worker, message="Worker Deleted Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))

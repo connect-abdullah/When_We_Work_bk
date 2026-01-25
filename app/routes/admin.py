@@ -19,17 +19,17 @@ def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
         new_admin = AdminService(db).create_admin(admin)
         return ok(data=new_admin, message="Admin Created Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
 
 # Get all admins
 @router.get("", response_model=APIResponse[AdminRead])
-def get_admins(business_id: str, db: Session = Depends(get_db)):
+def get_admins(business_id: int, db: Session = Depends(get_db)):
     """ Get all admins by business_id """
     try:
         all_admins = AdminService(db).get_all_admins(business_id=business_id)
         return ok(data=all_admins, message="Admins Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
 
 # Get admin by id
 @router.get("/{admin_id}", response_model=APIResponse[AdminRead])
@@ -39,7 +39,7 @@ def get_admin_by_id(admin_id: int, db: Session = Depends(get_db)):
         admin = AdminService(db).get_admin_by_id(admin_id=admin_id)
         return ok(data=admin, message="Admin Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Update admin
 @router.put("/{admin_id}",response_model=APIResponse[AdminRead])
@@ -54,7 +54,7 @@ def update_admin(admin_id: int, admin: AdminUpdate, db: Session = Depends(get_db
             )
         return ok(data=updated_admin, message="Admin Updated Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Delete Admin
 @router.delete("/{admin_id}", response_model=APIResponse[dict])
@@ -69,5 +69,5 @@ def delete_admin(admin_id: int, db: Session = Depends(get_db)):
         
         return ok(data=admin, message="Admin Deleted Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
 

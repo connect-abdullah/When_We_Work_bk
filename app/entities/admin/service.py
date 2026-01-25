@@ -34,7 +34,7 @@ class AdminService:
             raise
         
     # Get all admins by business_id
-    def get_all_admins(self, business_id: str) -> list[AdminRead]:
+    def get_all_admins(self, business_id: int) -> list[AdminRead]:
         try: 
             all_admins = self.db.query(Admin).filter(Admin.business_id == business_id).all()
             

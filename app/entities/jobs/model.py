@@ -1,5 +1,5 @@
 from enum import Enum
-from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Boolean, DateTime, Date
+from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Boolean, DateTime, Date, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
@@ -50,4 +50,7 @@ class Job(Base, BaseModel):
     language = Column(ARRAY(String), nullable=False)    # languages required for the job
     join_date = Column(DateTime, nullable=False) # date and time when the job will start
     
-    admin_id = Column(Integer, nullable=False) # foreign key of admin.id
+    admin_id = Column(Integer, ForeignKey("admin.id"), nullable=False) # foreign key of admin.id
+
+    # relationship for easy data access and retrieval
+    admin = relationship("Admin")  # backref automatically creates admin.jobs

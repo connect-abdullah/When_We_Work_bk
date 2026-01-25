@@ -19,7 +19,7 @@ def create_job(job: JobCreate, db: Session = Depends(get_db)):
         new_job = JobService(db).create_job(job)
         return ok(data=new_job, message="Job Created Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Get Job by Job ID
 @router.get("/{job_id}", response_model=APIResponse[JobRead])
@@ -29,7 +29,7 @@ def get_job_by_id(job_id: int, db: Session = Depends(get_db)):
         job = JobService(db).get_job_by_id(job_id)
         return ok(data=job, message="Job Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Get All Jobs by Admin ID
 @router.get("", response_model=APIResponse[JobRead])
@@ -39,7 +39,7 @@ def get_all_jobs(admin_id: int, db: Session = Depends(get_db)):
         all_jobs = JobService(db).get_all_jobs(admin_id)
         return ok(data=all_jobs, message="Jobs Found Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Update Job by Job ID  
 @router.put("/{job_id}", response_model=APIResponse[JobRead])
@@ -54,7 +54,7 @@ def update_job(job_id: int, job: JobUpdate, db: Session = Depends(get_db)):
             )
         return ok(data=updated_job, message="Job Updated Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))
         
 # Delete Job by Job ID
 @router.delete("/{job_id}", response_model=APIResponse[dict])
@@ -64,4 +64,4 @@ def delete_job(job_id: int, db: Session = Depends(get_db)):
         deleted_job = JobService(db).delete_job(job_id)
         return ok(data=deleted_job, message="Job Deleted Successfully")
     except Exception as e:
-        fail(message=str(e))
+        return fail(message=str(e))

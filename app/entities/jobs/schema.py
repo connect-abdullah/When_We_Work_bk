@@ -1,8 +1,10 @@
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.entities.jobs.model import JobCategory, JobStatus, ToneRequirement, SalaryType
 
 class JobBase(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+    
     title: str
     description: str
     status: JobStatus
@@ -29,5 +31,4 @@ class JobRead(JobBase):
     id: int
     admin_id: int
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)

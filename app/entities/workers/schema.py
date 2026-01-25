@@ -1,8 +1,10 @@
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.entities.workers.model import UserRoleEnum, Gender, EmploymentType
 
 class WorkerBase(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+    
     first_name: str
     middle_name: str | None = None
     last_name: str
@@ -30,5 +32,4 @@ class WorkerRead(WorkerBase):
     id: int
     admin_id: int
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)

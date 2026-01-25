@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Boolean
+from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
@@ -43,4 +43,7 @@ class Worker(Base, BaseModel):
     remarks = Column(String, nullable=True)
     
     
-    admin_id = Column(Integer, nullable=False) # foriegn key of admin.id
+    admin_id = Column(Integer, ForeignKey("admin.id"), nullable=False) # foreign key of admin.id
+
+    # relationship for easy data access and retrieval
+    admin = relationship("Admin")  # backref automatically creates admin.workers

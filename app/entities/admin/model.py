@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
 
+
 class UserRoleEnum(str, Enum):
     ADMIN = "admin"         # System admin - can create jobs and appoint workers
     WORKER = "worker"         # Worker - can apply for jobs
@@ -27,6 +28,9 @@ class Admin(Base, BaseModel):
     gender = Column(SQLAEnum(Gender), nullable=False)
     
     role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.ADMIN)
-    business_id = Column(String, nullable=False) # foreign key of business.id (associated business)
+    business_id = Column(Integer, ForeignKey("business.id"), nullable=False) # foreign key to business.id
+    
+    # relationship for easy data access and retrieval
+    business = relationship("Business")  # backref automatically creates business.admins
     
     
