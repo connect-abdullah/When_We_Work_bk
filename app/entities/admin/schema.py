@@ -11,12 +11,9 @@ class AdminBase(BaseModel):
     photo: str | None = None
     
     language: str = "en"
-    gender: Gender | None = None
-    role: UserRoleEnum = UserRoleEnum.ADMIN
+    gender: Gender
+    role: UserRoleEnum = UserRoleEnum.admin
     business_id: int
-    
-    class Config:
-        from_attributes = True
     
 class AdminCreate(AdminBase):
     pass

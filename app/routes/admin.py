@@ -22,7 +22,7 @@ def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
         return fail(message=str(e))
 
 # Get all admins
-@router.get("", response_model=APIResponse[AdminRead])
+@router.get("", response_model=APIResponse[List[AdminRead]])
 def get_admins(business_id: int, db: Session = Depends(get_db)):
     """ Get all admins by business_id """
     try:

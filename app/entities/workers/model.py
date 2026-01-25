@@ -6,19 +6,19 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
 
 class UserRoleEnum(str, Enum):
-    ADMIN = "admin"         # System admin - can create jobs and appoint workers
-    WORKER = "worker"         # Worker - can apply for jobs
+    admin = "admin"         # System admin - can create jobs and appoint workers
+    worker = "worker"         # Worker - can apply for jobs
 
 class Gender(str, Enum):
-    MALE = "male"
-    FEMALE = "female"
-    OTHER = "other"
+    male = "male"
+    female = "female"
+    other = "other"
 
 class EmploymentType(str, Enum):
-    FULL_TIME = "full_time"
-    PART_TIME = "part_time"
-    CONTRACT = "contract"
-    FREELANCER = "freelancer"
+    full_time = "full_time"
+    part_time = "part_time"
+    contract = "contract"
+    freelancer = "freelancer"
 
 class Worker(Base, BaseModel):
     __tablename__ = "workers"
@@ -38,7 +38,7 @@ class Worker(Base, BaseModel):
     availability = Column(Boolean, default=True)
     employment_type = Column(SQLAEnum(EmploymentType), nullable=False)
     
-    user_role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.WORKER)
+    user_role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.worker)
     roles = Column(ARRAY(String), nullable=False)
     remarks = Column(String, nullable=True)
     

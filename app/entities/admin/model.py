@@ -6,13 +6,13 @@ from app.db.base import Base, BaseModel
 
 
 class UserRoleEnum(str, Enum):
-    ADMIN = "admin"         # System admin - can create jobs and appoint workers
-    WORKER = "worker"         # Worker - can apply for jobs
+    admin = "admin"         # System admin - can create jobs and appoint workers
+    worker = "worker"         # Worker - can apply for jobs
 
 class Gender(str, Enum):
-    MALE = "male"
-    FEMALE = "female"
-    OTHER = "other"
+    male = "male"
+    female = "female"
+    other = "other"
 
 class Admin(Base, BaseModel):
     __tablename__ = "admin"
@@ -27,7 +27,7 @@ class Admin(Base, BaseModel):
     language = Column(String, nullable=False, default="en")
     gender = Column(SQLAEnum(Gender), nullable=False)
     
-    role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.ADMIN)
+    role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.admin)
     business_id = Column(Integer, ForeignKey("business.id"), nullable=False) # foreign key to business.id
     
     # relationship for easy data access and retrieval

@@ -5,27 +5,27 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
 
 class JobCategory(str, Enum):
-    FULL_TIME = "full_time"
-    PART_TIME = "part_time"
-    CONTRACT = "contract"
-    FREELANCER = "freelancer"
+    full_time = "full_time"
+    part_time = "part_time"
+    contract = "contract"
+    freelancer = "freelancer"
     
 class JobStatus(str, Enum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    active = "active"
+    inactive = "inactive"
+    completed = "completed"
+    cancelled = "cancelled"
     
 class ToneRequirement(str, Enum):
-    PROFESSIONAL = "professional"
-    CASUAL = "casual"
-    FORMAL = "formal"
-    FRIENDLY = "friendly"
-    EMPATHIC = "empathetic"
+    professional = "professional"
+    casual = "casual"
+    formal = "formal"
+    friendly = "friendly"
+    empathic = "empathetic"
 
 class SalaryType(str, Enum):
-    HOURLY = "hourly"
-    FIXED = "fixed"
+    hourly = "hourly"
+    fixed = "fixed"
     
 class Job(Base, BaseModel):
     __tablename__ = "jobs"

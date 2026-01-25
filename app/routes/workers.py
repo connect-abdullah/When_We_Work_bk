@@ -22,7 +22,7 @@ def create_worker(worker: WorkerCreate, db: Session = Depends(get_db)):
         return fail(message=str(e))
 
 # Get all workers
-@router.get("", response_model=APIResponse[WorkerRead])
+@router.get("", response_model=APIResponse[List[WorkerRead]])
 def get_workers(admin_id: int, db: Session = Depends(get_db)):
     """ Get all workers by admin_id """
     try:

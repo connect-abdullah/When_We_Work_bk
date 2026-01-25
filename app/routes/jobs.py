@@ -32,7 +32,7 @@ def get_job_by_id(job_id: int, db: Session = Depends(get_db)):
         return fail(message=str(e))
         
 # Get All Jobs by Admin ID
-@router.get("", response_model=APIResponse[JobRead])
+@router.get("", response_model=APIResponse[List[JobRead]])
 def get_all_jobs(admin_id: int, db: Session = Depends(get_db)):
     """ Get all jobs by admin_id """
     try:
