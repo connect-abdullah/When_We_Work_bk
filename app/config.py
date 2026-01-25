@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30)
     refresh_token_expire_days: int = Field(default=7)
+    DATABASE_URL: str = Field(default="postgresql://user:password@localhost:5432/dbname")
 
     
     @property

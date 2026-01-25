@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Application Service (using Supabase)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whenwework-app
+    env_file:
+      - .env
+    environment:
+      # DATABASE_URL will be read from .env file
+      DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount code for development (optional - remove in production)
+      - .:/app
+    restart: unless-stopped

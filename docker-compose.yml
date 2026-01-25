@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (optional - you can use Supabase instead)
+  postgres:
+    image: postgres:15-alpine
+    container_name: whenwework-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: whenwework
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - whenwework-network
+
+  # Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whenwework-app
+    env_file:
+      - .env
+    environment:
+      # DATABASE_URL will be read from .env file
+      # Default fallback to Supabase if .env is not present
+      DATABASE_URL: ${DATABASE_URL}
+      # To use local PostgreSQL instead, uncomment and set in .env:
+      # DATABASE_URL: postgresql://postgres:postgres@postgres:5432/whenwework
+    ports:
+      - "8000:8000"
+    depends_on:
+      # Only wait for postgres if using local database
+      # Comment out if using Supabase only
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Mount code for development (optional - remove in production)
+      - .:/app
+    networks:
+      - whenwework-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  whenwework-network:
+    driver: bridge

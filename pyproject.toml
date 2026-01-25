@@ -9,10 +9,12 @@ packages = [{include = "app"}]
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
 pydantic = "^2.12.4"
+pydantic-settings = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

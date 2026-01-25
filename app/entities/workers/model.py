@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Array, Boolean
+from sqlalchemy import Column, Integer, String, Enum as SQLAEnum, Boolean
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from app.db.base import Base, BaseModel
 
@@ -32,13 +33,13 @@ class Worker(Base, BaseModel):
     emergency_contact = Column(String, nullable=True)
     photo = Column(String, nullable=True)
     
-    language = Column(Array(String), nullable=True, default=["en"])
+    language = Column(ARRAY(String), nullable=True, default=["en"])
     gender = Column(SQLAEnum(Gender), nullable=False)
     availability = Column(Boolean, default=True)
     employment_type = Column(SQLAEnum(EmploymentType), nullable=False)
     
     user_role = Column(SQLAEnum(UserRoleEnum), default=UserRoleEnum.WORKER)
-    roles = Column(Array(String), nullable=False)
+    roles = Column(ARRAY(String), nullable=False)
     remarks = Column(String, nullable=True)
     
     
