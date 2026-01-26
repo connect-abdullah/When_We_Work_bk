@@ -49,7 +49,6 @@ class JobApplicationService:
             if(job_application):
                 self.db.delete(job_application)
                 self.db.commit()
-                self.db.refresh()
                 return True
             return False
         except Exception as e:

@@ -61,7 +61,6 @@ class BusinessService:
             if(business): 
                 self.db.delete(business)
                 self.db.commit()
-                self.db.refresh()
                 return True
             return False
         except Exception as e:

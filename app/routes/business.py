@@ -32,6 +32,7 @@ def get_business_by_id(business_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         return fail(message=str(e))
     
+# Get All Businesses
 @router.get("", response_model=APIResponse[List[BusinessRead]])
 def get_all_businesses(db:Session = Depends(get_db)):
     """ Get All Businesses """
