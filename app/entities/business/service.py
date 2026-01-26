@@ -15,7 +15,7 @@ class BusinessService:
             business = Business(**payload.model_dump())
             self.db.add(business)
             self.db.commit()
-            self.db.refresh()
+            self.db.refresh(business)
             return BusinessRead.model_validate(business)
         except Exception as e:
             logger.error(f"Error creating a business: {str(e)}")
@@ -23,8 +23,8 @@ class BusinessService:
     # Get a business by business_id
     def get_business_by_id(self, business_id: int) -> BusinessRead:
         try:
-            business = self.db.query(Business).filter(Business.id == business_id)
-            if(business): 
+            business = self.db.query(Business).filter(Business.id == business_id).first()
+            if business: 
                 return BusinessRead.model_validate(business)
             return None
         except Exception as e:
@@ -33,8 +33,8 @@ class BusinessService:
     # Get all businesses
     def get_all_businesses(self) -> list[BusinessRead]:
         try:
-            all_businesses = self.db.query(Business)
-            if(all_businesses): 
+            all_businesses = self.db.query(Business).all()
+            if all_businesses: 
                 return [BusinessRead.model_validate(business) for business in all_businesses]
             return []
         except Exception as e:
@@ -43,8 +43,8 @@ class BusinessService:
     # Update a business by business_id
     def update_business(self, business_id: int, payload: BusinessUpdate) -> BusinessRead:
         try:
-            business = self.db.query(Business).filter(Business.id == business_id)
-            if(business): 
+            business = self.db.query(Business).filter(Business.id == business_id).first()
+            if business: 
                 for key, value in payload.model_dump().items():
                     setattr(business, key, value)
                 self.db.commit()
@@ -57,8 +57,8 @@ class BusinessService:
     # Delete a business by business_id
     def delete_business(self, business_id: int) -> bool:
         try:
-            business = self.db.query(Business).filter(Business.id == business_id)
-            if(business): 
+            business = self.db.query(Business).filter(Business.id == business_id).first()
+            if business: 
                 self.db.delete(business)
                 self.db.commit()
                 return True
