@@ -34,8 +34,6 @@ class Job(Base, BaseModel):
     description = Column(String, nullable=False)
     status = Column(SQLAEnum(JobStatus), nullable=False)
     
-    email = Column(String, nullable=False)
-    phone = Column(String, nullable=False)
     minimum_education = Column(String, nullable=False)
     job_category = Column(SQLAEnum(JobCategory), nullable=False)
     

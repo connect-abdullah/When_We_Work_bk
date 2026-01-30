@@ -8,8 +8,6 @@ class JobBase(BaseModel):
     title: str
     description: str
     status: JobStatus
-    email: str
-    phone: str
     minimum_education: str
     job_category: JobCategory
     tone_requirement: ToneRequirement
