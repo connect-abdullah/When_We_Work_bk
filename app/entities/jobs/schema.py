@@ -17,7 +17,6 @@ class JobBase(BaseModel):
     salary: int
     salary_type: SalaryType | None = None
     language: list[str] | None = None
-    join_date: datetime | None = None
     admin_id: int
     
 class JobCreate(JobBase):
@@ -30,3 +29,11 @@ class JobRead(JobBase):
     id: int
     
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    
+class JobStats(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+    
+    workers_required: int
+    workers_hired: int
+    total_jobs: int
+    active_jobs: int

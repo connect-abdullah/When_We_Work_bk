@@ -35,7 +35,12 @@ class Settings(BaseSettings):
     
     # API
     api_v1_str: str = Field(default="/api/v1")
-    
+
+    # CORS
+    cors_origins: List[str] = Field(
+        default=["*"],
+        description="Allowed CORS origins (use ['*'] for all in dev, or list specific origins in prod)",
+    )
 
     secret_key: str = Field(default="your-secret-key-here-change-in-production")
     algorithm: str = Field(default="HS256")

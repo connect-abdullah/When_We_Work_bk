@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.jobs.service import JobService
-from app.entities.jobs.schema import JobCreate, JobRead, JobUpdate
+from app.entities.jobs.schema import JobCreate, JobRead, JobUpdate, JobStats
 
 router = APIRouter(
     prefix = "/jobs",
@@ -18,6 +18,16 @@ def create_job(job: JobCreate, db: Session = Depends(get_db)):
     try:
         new_job = JobService(db).create_job(job)
         return ok(data=new_job, message="Job Created Successfully")
+    except Exception as e:
+        return fail(message=str(e))
+
+# Get Job Stats by Admin ID (must be before /{job_id} so "stats" is not captured as job_id)
+@router.get("/stats", response_model=APIResponse[JobStats])
+def get_job_stats(admin_id: int, db: Session = Depends(get_db)):
+    """ Get job stats by admin_id """
+    try:
+        job_stats = JobService(db).get_jobs_stats(admin_id)
+        return ok(data=job_stats, message="Job Stats Found Successfully")
     except Exception as e:
         return fail(message=str(e))
         

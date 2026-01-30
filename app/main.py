@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes import router
 
@@ -8,6 +9,15 @@ app = FastAPI(
     version=settings.version,
     description=settings.description,
     debug=settings.debug,
+)
+
+# CORS (allow_credentials must be False when origins is ["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials="*" not in settings.cors_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include the API router

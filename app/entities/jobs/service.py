@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-from app.entities.jobs.schema import JobCreate, JobRead
-from app.entities.jobs.model import Job
+from sqlalchemy import func, case
+from app.entities.jobs.schema import JobCreate, JobRead, JobStats
+from app.entities.jobs.model import Job, JobStatus
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -69,4 +70,31 @@ class JobService:
             return False
         except Exception as e:
             logger.error(f"Error deleting job: {str(e)}")
+            raise
+        
+    # Get job stats (totals of workers_required / workers_hired across all jobs for this admin)
+    def get_jobs_stats(self, admin_id: int) -> JobStats:
+        try:
+            row = (
+                self.db.query(
+                    func.count(Job.id).label("total_jobs"),
+                    func.coalesce(func.sum(Job.workers_required), 0).label("workers_required"),
+                    func.coalesce(func.sum(Job.workers_hired), 0).label("workers_hired"),
+                    func.sum(case((Job.status == JobStatus.active, 1), else_=0)).label("active_jobs"),
+                )
+                .filter(Job.admin_id == admin_id)
+                .first()
+            )
+            total_jobs = row.total_jobs or 0
+            workers_required = int(row.workers_required)
+            workers_hired = int(row.workers_hired)
+            active_jobs = int(row.active_jobs or 0)
+            return JobStats(
+                workers_required=workers_required,
+                workers_hired=workers_hired,
+                total_jobs=total_jobs,
+                active_jobs=active_jobs,
+            )
+        except Exception as e:
+            logger.error(f"Error getting job status: {str(e)}")
             raise
