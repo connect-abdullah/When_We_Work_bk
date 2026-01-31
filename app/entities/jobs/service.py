@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case
-from app.entities.jobs.schema import JobCreate, JobRead, JobStats
+from app.entities.jobs.schema import JobCreate, JobRead, JobStats, JobUpdate
 from app.entities.jobs.model import Job, JobStatus
 from app.core.logging import get_logger
 
@@ -45,7 +45,7 @@ class JobService:
             raise
         
     # Update a job by job_id
-    def update_job(self, job_id: int, payload: JobCreate) -> JobRead:
+    def update_job(self, job_id: int, payload: JobUpdate) -> JobRead:
         try:
             job = self.db.query(Job).filter(Job.id == job_id).first()
             if (job):

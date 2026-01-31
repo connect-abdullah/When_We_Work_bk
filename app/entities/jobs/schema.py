@@ -16,7 +16,6 @@ class JobBase(BaseModel):
     workers_hired: int
     salary: int
     salary_type: SalaryType | None = None
-    language: list[str] | None = None
     admin_id: int
     
 class JobCreate(JobBase):

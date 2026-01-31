@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Application Service (using Supabase)
   app:
@@ -10,6 +8,8 @@ services:
     env_file:
       - .env
     environment:
+      # Enable auto-reload on code changes (set to 0 or remove in production)
+      RELOAD: "1"
       # DATABASE_URL will be read from .env file
       DATABASE_URL: ${DATABASE_URL}
     ports:

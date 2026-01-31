@@ -67,11 +67,16 @@ def update_job(job_id: int, job: JobUpdate, db: Session = Depends(get_db)):
         return fail(message=str(e))
         
 # Delete Job by Job ID
-@router.delete("/{job_id}", response_model=APIResponse[dict])
+@router.delete("/{job_id}", response_model=APIResponse[bool])
 def delete_job(job_id: int, db: Session = Depends(get_db)):
     """ Delete job by job_id """
     try:
-        deleted_job = JobService(db).delete_job(job_id)
-        return ok(data=deleted_job, message="Job Deleted Successfully")
+        deleted = JobService(db).delete_job(job_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Job not found"
+            )
+        return ok(data=True, message="Job Deleted Successfully")
     except Exception as e:
         return fail(message=str(e))

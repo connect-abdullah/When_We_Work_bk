@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database (optional - you can use Supabase instead)
   postgres:
@@ -30,6 +28,8 @@ services:
     env_file:
       - .env
     environment:
+      # Enable auto-reload on code changes (set to 0 or remove in production)
+      RELOAD: "1"
       # DATABASE_URL will be read from .env file
       # Default fallback to Supabase if .env is not present
       DATABASE_URL: ${DATABASE_URL}
