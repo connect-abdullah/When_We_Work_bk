@@ -48,7 +48,12 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = Field(default=7)
     DATABASE_URL: str = Field(default="postgresql://user:password@localhost:5432/dbname")
 
-    
+    # Email (SMTP) — set in .env
+    GOOGLE_SMTP: str = Field(default="smtp.gmail.com", description="From env: GOOGLE_SMTP")
+    GOOGLE_PORT: int = Field(default=587, description="From env: GOOGLE_PORT")
+    GOOGLE_EMAIL: str = Field(default="", description="From env: GOOGLE_EMAIL")
+    GOOGLE_PASSWORD: str = Field(default="", description="From env: GOOGLE_PASSWORD")
+
     @property
     def database_settings(self) -> DatabaseSettings:
         return DatabaseSettings(

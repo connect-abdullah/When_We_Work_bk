@@ -15,6 +15,9 @@ alembic = "*"
 psycopg2-binary = "*"
 pydantic = "^2.12.4"
 pydantic-settings = "*"
+PyJWT = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+email-validator = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

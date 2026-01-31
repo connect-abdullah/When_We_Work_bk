@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
+import secrets
 import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
-from app.core.config import settings
+from app.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -14,7 +15,8 @@ context = CryptContext(
     schemes=["sha512_crypt"]
 )
 
-
+def generate_random_password(length: int) -> str:
+    return secrets.token_urlsafe(length) # password like NuO5pUBw1J_-tfWTjB2e
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
@@ -95,3 +97,11 @@ def verify_token(token: str) -> dict:
         logger.error(f"Token (first 50 chars): {token[:50] if len(token) > 50 else token}")
         raise credentials_exception 
     
+    
+export_functions = {
+    "generate_random_password": generate_random_password,
+    "verify_password": verify_password,
+    "get_password_hash": get_password_hash,
+    "create_token": create_token,
+    "verify_token": verify_token,
+}
