@@ -57,7 +57,7 @@ def update_worker(worker_id: int, worker: WorkerUpdate, db: Session = Depends(ge
         return fail(message=str(e))
         
 # Delete Worker
-@router.delete("/{worker_id}", response_model=APIResponse[dict])
+@router.delete("/{worker_id}", response_model=APIResponse[bool])
 def delete_worker(worker_id: int, db: Session = Depends(get_db)):
     """ Delete worker by id """
     try:
@@ -67,6 +67,6 @@ def delete_worker(worker_id: int, db: Session = Depends(get_db)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Worker not found"
             )
-        return ok(data=deleted_worker, message="Worker Deleted Successfully")
+        return ok(data=True, message="Worker Deleted Successfully")
     except Exception as e:
         return fail(message=str(e))
