@@ -16,6 +16,7 @@ router = APIRouter(
 def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
     """ Create new admin """
     try:
+        
         new_admin = AdminService(db).create_admin(admin)
         return ok(data=new_admin, message="Admin Created Successfully")
     except Exception as e:

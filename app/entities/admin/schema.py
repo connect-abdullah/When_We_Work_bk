@@ -13,9 +13,9 @@ class AdminBase(BaseModel):
     language: str = "en"
     gender: Gender
     role: UserRoleEnum = UserRoleEnum.admin
-    business_id: int
     
 class AdminCreate(AdminBase):
+    business_id: int | None = None
     pass
 
 class AdminUpdate(AdminBase):
