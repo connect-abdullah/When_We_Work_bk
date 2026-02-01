@@ -17,7 +17,7 @@ router = APIRouter(
 def create_business(business: BusinessCreate, db: Session = Depends(get_db)):
     """ Create a business """
     try:
-        new_business = BusinessService.create_business(business)
+        new_business = BusinessService(db).create_business(business)
         return ok(data=new_business, message="Business Created Successfully!")
     except Exception as e:
         return fail(message=str(e))
@@ -43,7 +43,7 @@ def get_all_businesses(db:Session = Depends(get_db)):
         return fail(message=str(e))
     
 # Update Business
-@router.put("/{business_id}", response_model=APIResponse[BusinessRead])
+@router.put("/{business_id}", response_model=APIResponse[BusinessUpdate])
 def update_business(business_id: int, business: BusinessUpdate, db: Session = Depends(get_db)):
     """ Update a business """
     try:
@@ -58,7 +58,7 @@ def update_business(business_id: int, business: BusinessUpdate, db: Session = De
         return fail(message=str(e))
     
 # Delete Business
-@router.delete("/{business_id}", response_model=APIResponse[dict])
+@router.delete("/{business_id}", response_model=APIResponse[bool])
 def delete_business(business_id: int, db: Session = Depends(get_db)):
     """ Delete a business """
     try:
@@ -68,6 +68,6 @@ def delete_business(business_id: int, db: Session = Depends(get_db)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Business not found"
             )
-        return ok(data=deleted_business, message="Business Deleted Successfully")
+        return ok(data=True, message="Business Deleted Successfully")
     except Exception as e:
         return fail(message=str(e))

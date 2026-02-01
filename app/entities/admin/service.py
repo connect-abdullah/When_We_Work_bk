@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 from app.entities.admin.schema import AdminCreate, AdminRead
 from app.entities.admin.model import Admin
 from app.core.logging import get_logger
+from app.core.security import verify_password, create_token
+from fastapi import HTTPException
 
 
 logger = get_logger(__name__)
@@ -82,3 +84,15 @@ class AdminService:
             logger.error(f"Error deleting admin: {str(e)}")
             raise
 
+    # Login admin
+    def login_admin(self, email: str, password: str) -> str:
+        try:
+            admin = self.db.query(Admin).filter(Admin.email == email).first()
+            if not admin:
+                raise HTTPException(status_code=401, detail="Admin not found")
+            if not verify_password(password, admin.password):
+                raise HTTPException(status_code=401, detail="Invalid password")
+            return create_token(admin.model_dump(), 18000) # 18000 seconds = 5 hours
+        except Exception as e:
+            logger.error(f"Error logging in admin: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))

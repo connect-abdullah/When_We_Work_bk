@@ -21,6 +21,7 @@ class Admin(Base, BaseModel):
     middle_name = Column(String, nullable=True)
     last_name = Column(String, nullable=False)
     email = Column(String, nullable=False)
+    password = Column(String, nullable=False)
     phone = Column(String, nullable=False)
     photo = Column(String, nullable=True)
     

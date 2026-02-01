@@ -16,11 +16,16 @@ class AdminBase(BaseModel):
     
 class AdminCreate(AdminBase):
     business_id: int | None = None
+    password: str | None = None
     pass
 
 class AdminUpdate(AdminBase):
     pass
-     
+
+class AdminLogin(BaseModel):
+    email: str
+    password: str
+
 class AdminRead(AdminBase):
     id: int
     

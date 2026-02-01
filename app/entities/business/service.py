@@ -53,6 +53,7 @@ class BusinessService:
             return None
         except Exception as e:
             logger.error(f"Error updating a business: {str(e)}")
+            raise
     
     # Delete a business by business_id
     def delete_business(self, business_id: int) -> bool:

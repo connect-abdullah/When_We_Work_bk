@@ -58,17 +58,17 @@ def update_admin(admin_id: int, admin: AdminUpdate, db: Session = Depends(get_db
         return fail(message=str(e))
         
 # Delete Admin
-@router.delete("/{admin_id}", response_model=APIResponse[dict])
+@router.delete("/{admin_id}", response_model=APIResponse[bool])
 def delete_admin(admin_id: int, db: Session = Depends(get_db)):
     try:
-        admin = AdminService(db).delete_admin(admin_id=admin_id)
-        if not admin:
+        deleted_admin = AdminService(db).delete_admin(admin_id=admin_id)
+        if not deleted_admin:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Admin already deleted"
             )
         
-        return ok(data=admin, message="Admin Deleted Successfully")
+        return ok(data=True, message="Admin Deleted Successfully")
     except Exception as e:
         return fail(message=str(e))
 
