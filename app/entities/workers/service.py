@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
-from app.entities.workers.schema import WorkerCreate, WorkerRead
+from app.entities.workers.schema import WorkerCreate, WorkerRead, WorkerTokenResponse, WorkerLogin
 from app.entities.workers.model import Worker
 from app.core.logging import get_logger
 from app.core.email import EmailService
-from app.core.security import get_password_hash, generate_random_password
+from app.core.security import get_password_hash, generate_random_password, verify_password, create_token
 from email_validator import validate_email, EmailNotValidError
+from fastapi import HTTPException
+from datetime import datetime, timezone
 
 logger = get_logger(__name__)
 
@@ -123,3 +125,25 @@ class WorkerService:
         except Exception as e:
             logger.error(f"Error deleting worker: {str(e)}")
             raise
+        
+    # Login worker
+    def login_worker(self, payload: WorkerLogin) -> WorkerTokenResponse:
+        try:
+            worker = self.db.query(Worker).filter(Worker.email == payload.email).first()
+            if not worker:
+                raise HTTPException(status_code=401, detail="Worker not found")
+            if not verify_password(payload.password, worker.password):
+                raise HTTPException(status_code=401, detail="Invalid password")
+            worker_data = {
+                "id": worker.id,
+                "name": f"{worker.first_name} {worker.last_name}",
+                "email": worker.email,
+                "role": worker.role.value if hasattr(worker.role, 'value') else str(worker.role),
+                "last_login_at": datetime.now(timezone.utc)
+            }
+            token = create_token({"sub": str(worker.id), "role": worker.role.value if hasattr(worker.role, 'value') else str(worker.role)})
+            token_response = WorkerTokenResponse(**worker_data , access_token=token, token_type="Bearer")
+            return token_response
+        except Exception as e:
+            logger.error(f"Error logging in worker: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))

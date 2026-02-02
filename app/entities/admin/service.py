@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
-from app.entities.admin.schema import AdminCreate, AdminRead
+from app.entities.admin.schema import AdminCreate, AdminRead, AdminLogin, AdminTokenResponse
 from app.entities.admin.model import Admin
 from app.core.logging import get_logger
-from app.core.security import verify_password, create_token
-from fastapi import HTTPException
-
+from app.core.security import verify_password, create_token, get_password_hash
+from fastapi import HTTPException   
+from time import time
+from datetime import datetime, timezone
 
 logger = get_logger(__name__)
 
@@ -15,6 +16,8 @@ class AdminService:
     # Create admin
     def create_admin(self, payload: AdminCreate) -> AdminRead:
         try:
+            if payload.password:
+                payload.password = get_password_hash(payload.password) # hash the password
             admin = Admin(**payload.model_dump()) # dumping the payload as json so it can be read as it is
             self.db.add(admin) # add that admin payload into database
             self.db.commit() # making new changes/commiting new change to the database.
@@ -85,14 +88,24 @@ class AdminService:
             raise
 
     # Login admin
-    def login_admin(self, email: str, password: str) -> str:
+    def login_admin(self, payload: AdminLogin) -> AdminTokenResponse:
         try:
-            admin = self.db.query(Admin).filter(Admin.email == email).first()
+            admin = self.db.query(Admin).filter(Admin.email == payload.email).first()
             if not admin:
                 raise HTTPException(status_code=401, detail="Admin not found")
-            if not verify_password(password, admin.password):
+            if not verify_password(payload.password, admin.password):
                 raise HTTPException(status_code=401, detail="Invalid password")
-            return create_token(admin.model_dump(), 18000) # 18000 seconds = 5 hours
+            admin_data = {
+                "id": admin.id,
+                "name": f"{admin.first_name} {admin.last_name}",
+                "business_name": admin.business.business_name,
+                "email": admin.email,
+                "role": admin.role.value if hasattr(admin.role, 'value') else str(admin.role),
+                "last_login_at": datetime.now(timezone.utc)
+            }
+            token = create_token({"sub": str(admin.id), "role": admin.role.value if hasattr(admin.role, 'value') else str(admin.role)}) # 18000 seconds = 5 hours
+            token_response = AdminTokenResponse(**admin_data , access_token=token, token_type="Bearer")
+            return token_response
         except Exception as e:
             logger.error(f"Error logging in admin: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))

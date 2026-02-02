@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 from app.entities.workers.model import UserRoleEnum, Gender, EmploymentType
 
 class WorkerBase(BaseModel):
@@ -38,3 +38,16 @@ class WorkerRead(WorkerBase):
     admin_id: int
     
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    
+class WorkerTokenResponse(BaseModel):
+    id: int
+    name: str | None = None
+    email: EmailStr | None = None
+    role: UserRoleEnum
+    last_login_at: datetime | None = None
+    access_token: str
+    token_type: str
+    
+class WorkerLogin(BaseModel):
+    email: str
+    password: str
