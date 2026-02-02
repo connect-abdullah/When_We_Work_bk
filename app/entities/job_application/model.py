@@ -8,6 +8,7 @@ from app.db.base import Base, BaseModel
 
 class JobApplicationStatus(str, Enum):
     pending = "pending"
+    applied = "applied"
     approved = "approved"
     rejected = "rejected"
 
