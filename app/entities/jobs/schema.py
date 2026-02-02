@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict
-from app.entities.jobs.model import JobCategory, JobStatus, ToneRequirement, SalaryType
+from app.entities.jobs.model import JobCategory, JobStatus, SalaryType
 
 class JobBase(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
@@ -10,14 +10,13 @@ class JobBase(BaseModel):
     status: JobStatus
     minimum_education: str
     job_category: JobCategory
-    tone_requirement: ToneRequirement
     characteristics: list[str] | None = None
     workers_required: int
-    workers_hired: int
     salary: int
     salary_type: SalaryType | None = None
-    admin_id: int
-    
+    from_date_time: datetime
+    to_date_time: datetime
+
 class JobCreate(JobBase):
     pass
 
@@ -26,7 +25,9 @@ class JobUpdate(JobBase):
 
 class JobRead(JobBase):
     id: int
-    
+    admin_id: int  # from backend only (set from token)
+    workers_hired: int | None = None
+
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
     
 class JobStats(BaseModel):

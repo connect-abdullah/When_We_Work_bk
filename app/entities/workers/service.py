@@ -42,8 +42,8 @@ class WorkerService:
         except Exception as e:
             logger.error(f"Error checking if worker email exists: {str(e)}")
             raise
-    # Create worker
-    def create_worker(self, payload: WorkerCreate) -> WorkerRead:
+    # Create worker (admin_id set by backend from token, not from frontend)
+    def create_worker(self, payload: WorkerCreate, admin_id: int) -> WorkerRead:
         try:
             already_exists = self.check_worker_email_exists(payload.email)
             if already_exists:
@@ -51,14 +51,17 @@ class WorkerService:
                 raise ValueError("Worker with this email already exists")
             # Validate email format
             try:
-                validate_email(payload.email)  # format only; skip MX check (allows example.com in dev)
+                validate_email(payload.email, check_deliverability=False)
             except EmailNotValidError as e:
                 logger.error(f"Error validating email: {str(e)}")
                 raise
             password = self.send_worker_email_with_password(payload.email)
-            payload.password = password
-            worker = Worker(**payload.model_dump()) # dumping the payload as json so it can be read as it is
-            self.db.add(worker) # add that worker payload into database
+            data = payload.model_dump() | {"admin_id": admin_id}
+            data["password"] = password
+            if data.get("roles") is None:
+                data["roles"] = []
+            worker = Worker(**data)
+            self.db.add(worker)
             self.db.commit() # making new changes/commiting new change to the database.
             self.db.refresh(worker) # Refresh the worker instance to get its up-to-date state from the database, as it is going to return whole payload with different fields as response
             return WorkerRead.model_validate(worker)
@@ -138,12 +141,14 @@ class WorkerService:
                 "id": worker.id,
                 "name": f"{worker.first_name} {worker.last_name}",
                 "email": worker.email,
-                "role": worker.role.value if hasattr(worker.role, 'value') else str(worker.role),
+                "role": worker.user_role.value if hasattr(worker.user_role, 'value') else str(worker.user_role),
                 "last_login_at": datetime.now(timezone.utc)
             }
-            token = create_token({"sub": str(worker.id), "role": worker.role.value if hasattr(worker.role, 'value') else str(worker.role)})
+            token = create_token({"sub": str(worker.id), "role": worker.user_role.value if hasattr(worker.user_role, 'value') else str(worker.user_role)})
             token_response = WorkerTokenResponse(**worker_data , access_token=token, token_type="Bearer")
             return token_response
+        except HTTPException:
+            raise  # keep 401 / 404 etc as-is
         except Exception as e:
             logger.error(f"Error logging in worker: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))

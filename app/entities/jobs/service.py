@@ -10,10 +10,11 @@ class JobService:
     def __init__(self, db: Session) -> None:
         self.db = db
         
-    # Create a job
-    def create_job(self, payload: JobCreate) -> JobRead:
+    # Create a job (admin_id set by backend from token, not from frontend)
+    def create_job(self, payload: JobCreate, admin_id: int) -> JobRead:
         try:
-            job = Job(**payload.model_dump())
+            data = payload.model_dump() | {"admin_id": admin_id}
+            job = Job(**data)
             self.db.add(job)
             self.db.commit()
             self.db.refresh(job)
@@ -87,7 +88,7 @@ class JobService:
             )
             total_jobs = row.total_jobs or 0
             workers_required = int(row.workers_required)
-            workers_hired = int(row.workers_hired)
+            workers_hired = int(row.workers_hired) if row.workers_hired else 0
             active_jobs = int(row.active_jobs or 0)
             return JobStats(
                 workers_required=workers_required,
@@ -96,5 +97,5 @@ class JobService:
                 active_jobs=active_jobs,
             )
         except Exception as e:
-            logger.error(f"Error getting job status: {str(e)}")
+            logger.error(f"Error getting job stats: {str(e)}")
             raise
