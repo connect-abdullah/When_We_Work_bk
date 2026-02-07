@@ -113,12 +113,14 @@ class UserService:
             user_data = {
                 "id": user.id,
                 "name": f"{user.first_name} {user.last_name}",
-                "business_name": user.business.business_name,
+                "business_name": user.business.name if user.business else None,
                 "email": user.email,
                 "user_role": user.user_role,
                 "last_login_at": datetime.now(timezone.utc),
+                "admin_id": user.admin_id,
             }
-            token = create_token({"sub": str(user.id), "role": role_val})
+            admin_id = user.admin_id if user.admin_id else None
+            token = create_token({"sub": str(user.id), "role": role_val, "admin_id": admin_id})
             return UserTokenResponse(**user_data, access_token=token, token_type="Bearer")
         except HTTPException:
             raise

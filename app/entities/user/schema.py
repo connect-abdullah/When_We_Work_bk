@@ -51,6 +51,7 @@ class UserTokenResponse(BaseModel):
     name: str | None = None
     business_name: str | None = None
     email: EmailStr | None = None
+    admin_id: int | None = None
 
     user_role: UserRoleEnum
     last_login_at: datetime | None = None

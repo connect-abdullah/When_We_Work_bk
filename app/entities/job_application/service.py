@@ -10,9 +10,10 @@ class JobApplicationService:
         self.db = db
         
     # Create job application
-    def create_job_application(self, payload: JobApplicationCreate) -> JobApplicationRead:
+    def create_job_application(self, payload: JobApplicationCreate, worker_id: int) -> JobApplicationRead:
         try:
-            job_application = JobApplication(**payload.model_dump())
+            data = payload.model_dump() | {"worker_id": worker_id}
+            job_application = JobApplication(**data)
             self.db.add(job_application)
             self.db.commit()
             self.db.refresh(job_application)

@@ -39,7 +39,12 @@ def get_current_admin_id(
         role = payload.get("role")
         if sub is None:
             raise credentials_exception
-        if role != "admin":
+        if role != "admin" and role == "worker":
+            admin_id = payload.get("admin_id")
+            if admin_id is None: 
+                raise forbidden_exception
+            return admin_id
+        elif role != "admin"and role != "worker":
             raise forbidden_exception
         return int(sub)
     except HTTPException:
@@ -65,3 +70,32 @@ def get_current_admin_id_optional(
     except Exception:
         pass
     return None
+
+def get_current_worker_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> int:
+    """Return worker_id from JWT if valid worker token present, else raises. Use for routes that require worker auth."""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    forbidden_exception = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Worker access required.",
+    )
+    try:
+        token = credentials.credentials
+        payload = verify_token(token)
+        sub = payload.get("sub")
+        role = payload.get("role")
+        if sub is None:
+            raise credentials_exception
+        if role != "worker":
+            raise forbidden_exception
+        return int(sub)
+    except HTTPException:
+        raise
+    except (InvalidTokenError, ValueError, TypeError) as e:
+        logger.error(f"Token validation error: {str(e)}")
+        raise credentials_exception

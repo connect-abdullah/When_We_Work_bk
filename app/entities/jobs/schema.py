@@ -13,11 +13,11 @@ class JobBase(BaseModel):
     characteristics: list[str] | None = None
     workers_required: int
     salary: int
-    salary_type: SalaryType | None = None
     from_date_time: datetime
     to_date_time: datetime
 
 class JobCreate(JobBase):
+    salary_type: SalaryType = SalaryType.fixed
     pass
 
 class JobUpdate(JobBase):

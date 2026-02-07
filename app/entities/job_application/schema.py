@@ -5,15 +5,14 @@ class JobApplicationBase(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
     
     job_id: int
-    worker_id: int
-    approved_status: JobApplicationStatus = JobApplicationStatus.pending
+    approved_status: JobApplicationStatus = JobApplicationStatus.applied
     
 class JobApplicationCreate(JobApplicationBase):
     pass
 
 class JobApplicationRead(JobApplicationBase):
     id: int
-    
+    worker_id: int
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
     
 class JobApplicationUpdate(JobApplicationBase):

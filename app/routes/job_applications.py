@@ -1,4 +1,3 @@
-from this import d
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
@@ -6,6 +5,7 @@ from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.job_application.service import JobApplicationService
 from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate
+from app.core.auth import get_current_worker_id
 
 router = APIRouter(
     prefix = "/job_applications",
@@ -14,10 +14,10 @@ router = APIRouter(
 
 # Create Job Application
 @router.post("", response_model=APIResponse[JobApplicationRead])
-def create_job_application(job_application: JobApplicationCreate, db: Session = Depends(get_db)):
+def create_job_application(job_application: JobApplicationCreate, db: Session = Depends(get_db), worker_id: int = Depends(get_current_worker_id)):
     """ Create a job application """
     try:
-        new_job_application = JobApplicationService(db).create_job_application(job_application)
+        new_job_application = JobApplicationService(db).create_job_application(job_application, worker_id=worker_id)
         return ok(data=new_job_application, message="Job Application Created Successfully!")
     except Exception as e:
         return fail(message=str(e))
@@ -33,8 +33,8 @@ def get_job_application_by_id(job_application_id: int, db: Session = Depends(get
         return fail(message=str(e))
     
 # Get All Job Applications by Worker ID
-@router.get("/{worker_id}", response_model=APIResponse[List[JobApplicationRead]])
-def get_all_job_applications(worker_id: int, db:Session = Depends(get_db)):
+@router.get("", response_model=APIResponse[List[JobApplicationRead]])
+def get_all_job_applications(db:Session = Depends(get_db), worker_id: int = Depends(get_current_worker_id)):
     """ Get All Job Applications by Worker ID """
     try:
         all_job_applications = JobApplicationService(db).get_all_job_applications(worker_id=worker_id)
