@@ -47,3 +47,21 @@ def get_current_admin_id(
     except (InvalidTokenError, ValueError, TypeError) as e:
         logger.error(f"Token validation error: {str(e)}")
         raise credentials_exception
+
+
+def get_current_admin_id_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
+) -> int | None:
+    """Return admin_id from JWT if valid admin token present, else None. Use for routes that allow optional admin auth."""
+    if credentials is None:
+        return None
+    try:
+        token = credentials.credentials
+        payload = verify_token(token)
+        sub = payload.get("sub")
+        role = payload.get("role")
+        if sub is not None and role == "admin":
+            return int(sub)
+    except Exception:
+        pass
+    return None

@@ -49,8 +49,8 @@ class Job(Base, BaseModel):
     to_date_time = Column(DateTime(timezone=True), nullable=False)
     
     
-    admin_id = Column(Integer, ForeignKey("admin.id"), nullable=False) # foreign key of admin.id
+    admin_id = Column(Integer, ForeignKey("users.id"), nullable=False) # foreign key of user.id
 
     # relationship for easy data access and retrieval
-    admin = relationship("Admin")  # backref automatically creates admin.jobs
+    user = relationship("User")  # backref automatically creates user.jobs
     

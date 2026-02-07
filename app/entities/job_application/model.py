@@ -16,9 +16,9 @@ class JobApplication(Base, BaseModel):
     __tablename__ = "job_applications"
     
     job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
-    worker_id = Column(Integer, ForeignKey("workers.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_status = Column(SQLAEnum(JobApplicationStatus), nullable=False)
     
     # relationship for easy data access and retrieval
     job = relationship("Job", backref="job_applications")  # backref automatically creates job.job_applications
-    worker = relationship("Worker", backref="job_applications")  # backref automatically creates worker.job_applications
+    user = relationship("User", backref="job_applications")  # backref automatically creates user.job_applications
