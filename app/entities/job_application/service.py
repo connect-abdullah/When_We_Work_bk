@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate
+from sqlalchemy.orm import Session, joinedload
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval
 from app.entities.job_application.model import JobApplication
 from app.core.logging import get_logger
 
@@ -68,3 +68,48 @@ class JobApplicationService:
         except Exception as e:
             logger.error(f"Error updating a job application: {str(e)}")
         
+
+# Approve Job application approval by admin
+class JobApplicationApprovalService:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def approve_job_application(self, payload: JobApplicationRead) -> JobApplicationUpdate:
+        try:
+            job_application = self.db.query(JobApplication).filter(JobApplication.id == payload.id and JobApplication.worker_id == payload.worker_id).first()
+            if job_application:
+                job_application.approved_status = payload.approved_status
+                self.db.commit()
+                self.db.refresh(job_application)
+                return JobApplicationUpdate.model_validate(job_application)
+            return None
+        except Exception as e:
+            logger.error(f"Error approving a job application: {str(e)}")
+            
+    def get_all_job_applications(self, admin_id: int) -> list[JobApproval]:
+        try:
+            rows = (
+                self.db.query(JobApplication)
+                .options(joinedload(JobApplication.job), joinedload(JobApplication.user))
+                .filter(JobApplication.user.has(admin_id=admin_id))
+                .all()
+            )
+            return [
+                JobApproval(
+                    id=ja.id,
+                    job_id=ja.job_id,
+                    job_name=ja.job.title,
+                    worker_id=ja.worker_id,
+                    worker_name=f"{ja.user.first_name} {ja.user.last_name}".strip(),
+                    worker_email=ja.user.email,
+                    availability=ja.user.availability or False,
+                    gender=ja.user.gender,
+                    employment_type=ja.user.employment_type,
+                    workers_required=ja.job.workers_required,
+                    workers_hired=ja.job.workers_hired,
+                )
+                for ja in rows
+            ]
+        except Exception as e:
+            logger.error(f"Error getting all job applications: {str(e)}")
+            raise

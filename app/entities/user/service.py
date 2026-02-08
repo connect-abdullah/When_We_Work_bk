@@ -113,7 +113,7 @@ class UserService:
             user_data = {
                 "id": user.id,
                 "name": f"{user.first_name} {user.last_name}",
-                "business_name": user.business.name if user.business else None,
+                "business_name": user.business.business_name if user.business else None,
                 "email": user.email,
                 "user_role": user.user_role,
                 "last_login_at": datetime.now(timezone.utc),
