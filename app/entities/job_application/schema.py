@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from app.entities.job_application.model import JobApplicationStatus
 from app.entities.user.schema import Gender, EmploymentType
+from app.entities.jobs.schema import JobBase, JobRead
 
 class JobApplicationBase(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
@@ -31,3 +32,8 @@ class JobApproval(BaseModel):
     workers_required: int | None = None
     workers_hired: int | None = None
     employment_type: EmploymentType | None = None
+    
+class JobApplicationWorkerStatus(BaseModel):
+    approved_status: JobApplicationStatus
+    job_details: JobRead
+    model_config = ConfigDict(use_enum_values=True)

@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
-from app.core.auth import get_current_admin_id
+from app.core.auth import get_current_admin_id, get_admin_id_for_jobs
 from app.entities.jobs.service import JobService
 from app.entities.jobs.schema import JobCreate, JobRead, JobUpdate, JobStats
 from app.core.logging import get_logger
@@ -59,13 +59,19 @@ def get_job_by_id(
         return fail(message=str(e))
 
 
-# Get All Jobs (requires admin; uses admin_id from token)
+# Get All Jobs (accessible by both admin and workers)
+# Workers can view jobs posted by their admin (admin_id stored in worker token)
+# Admins can view their own jobs
 @router.get("", response_model=APIResponse[List[JobRead]])
 def get_all_jobs(
     db: Session = Depends(get_db),
-    admin_id: int = Depends(get_current_admin_id),
+    admin_id: int = Depends(get_admin_id_for_jobs),  # Returns admin_id for both admin and worker roles
 ):
-    """Get all jobs for the logged-in admin."""
+    """
+    Get all jobs filtered by admin_id.
+    - Admins see their own jobs
+    - Workers see jobs posted by their associated admin
+    """
     try:
         all_jobs = JobService(db).get_all_jobs(admin_id)
         return ok(data=all_jobs, message="Jobs Found Successfully")

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.job_application.service import JobApplicationService, JobApplicationApprovalService
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus
 from app.core.auth import get_current_worker_id, get_current_admin_id
 
 router = APIRouter(
@@ -42,6 +42,15 @@ def approve_job_application(job_application: JobApplicationRead, db: Session = D
     except Exception as e:
         return fail(message=str(e))
     
+# Get All Job Applications by Worker ID --- WORKER PANEL ---
+@router.get("/job-application-status-panel", response_model=APIResponse[List[JobApplicationWorkerStatus]])
+def get_all_job_applications_by_worker(db: Session = Depends(get_db), worker_id: int = Depends(get_current_worker_id)):
+    """ Get All Job Applications by Worker ID """
+    try:
+        all_job_applications = JobApplicationApprovalService(db).get_job_applications_by_worker_id(worker_id=worker_id)
+        return ok(data=all_job_applications, message="All Job Applications Found Successfully")
+    except Exception as e:
+        return fail(message=str(e))
     
 # Get Job Application by ID --- WORKER PANEL ---
 @router.get("/{job_application_id}", response_model=APIResponse[JobApplicationRead])
@@ -78,7 +87,7 @@ def update_job_application(job_application_id: int, job_application: JobApplicat
     except Exception as e:
         return fail(message=str(e))
     
-# Delete Job Application --- WORKER PANEL ---
+    # Delete Job Application --- WORKER PANEL ---
 @router.delete("/{job_application_id}", response_model=APIResponse[dict])
 def delete_job_application(job_application_id: int, db: Session = Depends(get_db)):
     """ Delete a job application """

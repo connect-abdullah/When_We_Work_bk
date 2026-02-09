@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval
-from app.entities.job_application.model import JobApplication
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus
+from app.entities.job_application.model import JobApplication, JobApplicationStatus
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -79,6 +79,10 @@ class JobApplicationApprovalService:
             job_application = self.db.query(JobApplication).filter(JobApplication.id == payload.id and JobApplication.worker_id == payload.worker_id).first()
             if job_application:
                 job_application.approved_status = payload.approved_status
+                # Initialize workers_hired to 0 if it's None
+                if job_application.job.workers_hired is None:
+                    job_application.job.workers_hired = 0
+                job_application.job.workers_hired += 1
                 self.db.commit()
                 self.db.refresh(job_application)
                 return JobApplicationUpdate.model_validate(job_application)
@@ -91,7 +95,7 @@ class JobApplicationApprovalService:
             rows = (
                 self.db.query(JobApplication)
                 .options(joinedload(JobApplication.job), joinedload(JobApplication.user))
-                .filter(JobApplication.user.has(admin_id=admin_id))
+                .filter(JobApplication.user.has(admin_id=admin_id), JobApplication.approved_status == JobApplicationStatus.applied)
                 .all()
             )
             return [
@@ -112,4 +116,15 @@ class JobApplicationApprovalService:
             ]
         except Exception as e:
             logger.error(f"Error getting all job applications: {str(e)}")
+            raise
+        
+    def get_job_applications_by_worker_id(self, worker_id: int) -> list[JobApplicationWorkerStatus]:
+        try:
+            rows = self.db.query(JobApplication).options(joinedload(JobApplication.job)).filter(JobApplication.worker_id == worker_id).all()
+            return [JobApplicationWorkerStatus(
+                approved_status=ja.approved_status,
+                job_details=ja.job
+            ) for ja in rows]
+        except Exception as e:
+            logger.error(f"Error getting job applications by worker id: {str(e)}")
             raise

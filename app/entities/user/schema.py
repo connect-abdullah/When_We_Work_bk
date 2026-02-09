@@ -24,8 +24,35 @@ class UserCreate(UserBase):
     password: str | None = None
     pass
 
-class UserUpdate(UserBase):
+class UserUpdateByWorker(BaseModel):
+    """
+    Worker self-update schema - workers can update their own info.
+    CANNOT change: email, user_role (admin-only fields)
+    """
+    first_name: str | None = None
+    last_name: str | None = None
+    phone: str | None = None
+    address: str | None = None
+    emergency_contact: str | None = None
+    photo: str | None = None
+    gender: Gender | None = None
+    availability: bool | None = None
+    password: str | None = None
+    employment_type: EmploymentType | None = None
+    worker_roles: list[str] | None = None
+    remarks: str | None = None
+
+
+class UserUpdateByAdmin(UserBase):
+    """
+    Admin update schema - admins can update everything including email and user_role.
+    Used when admin updates worker information.
+    """
     pass
+
+
+# Alias for backward compatibility - defaults to admin update (full permissions)
+UserUpdate = UserUpdateByAdmin
 
 class UserLogin(BaseModel):
     email: str

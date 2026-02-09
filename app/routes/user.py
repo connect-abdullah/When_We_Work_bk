@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.entities.user.service import UserService
-from app.entities.user.schema import UserCreate, UserRead, UserCreateResponse, UserUpdate, UserLogin, UserTokenResponse
+from app.entities.user.schema import UserCreate, UserRead, UserCreateResponse, UserUpdate, UserUpdateByWorker, UserUpdateByAdmin, UserLogin, UserTokenResponse
 from app.core.response import APIResponse, ok, fail
-from app.core.auth import get_current_admin_id, get_current_admin_id_optional
+from app.core.auth import get_current_admin_id, get_current_admin_id_optional, get_current_worker_id
 from app.db.session import get_db
 from sqlalchemy.orm import Session
 from app.entities.user.modal import UserRoleEnum
@@ -54,16 +54,60 @@ def get_all_users(db: Session = Depends(get_db), admin_id: int = Depends(get_cur
     except Exception as e:
         return fail(message=str(e))
     
-# Update User
-@router.put("/{user_id}", response_model=APIResponse[UserRead])
-def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
-    """ Update a user """
+# Update User by Admin (can change everything including email and user_role)
+@router.put("/admin/{user_id}", response_model=APIResponse[UserRead])
+def update_user_by_admin(
+    user_id: int, 
+    user: UserUpdateByAdmin, 
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(get_current_admin_id)
+):
+    """
+    Update user by admin. Admin can change everything including:
+    - email
+    - user_role
+    - All other user fields
+    """
     try:
         updated_user = UserService(db).update_user(user_id=user_id, payload=user)
-        return ok(data=updated_user, message="User Updated Successfully")
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        return ok(data=updated_user, message="User Updated Successfully by Admin")
+    except HTTPException:
+        raise
     except Exception as e:
         return fail(message=str(e))
-    
+
+
+# Update User by Worker (self-update, cannot change email or user_role)
+@router.put("/worker/me", response_model=APIResponse[UserRead])
+def update_worker_profile(
+    user: UserUpdateByWorker, 
+    db: Session = Depends(get_db),
+    worker_id: int = Depends(get_current_worker_id)
+):
+    """
+    Workers update their own profile. Cannot change:
+    - email (admin-only)
+    - user_role (admin-only)
+    """
+    try:
+        updated_user = UserService(db).update_user(user_id=worker_id, payload=user)
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        return ok(data=updated_user, message="Profile Updated Successfully")
+    except HTTPException:
+        raise
+    except Exception as e:
+        return fail(message=str(e))
+
+
 # Delete User  
 @router.delete("/{user_id}", response_model=APIResponse[bool])
 def delete_user(user_id: int, db: Session = Depends(get_db), admin_id: int = Depends(get_current_admin_id)):
@@ -83,3 +127,4 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
         return ok(data=token, message="Login Successfully")
     except Exception as e:
         return fail(message=str(e))
+    
