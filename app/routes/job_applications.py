@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.job_application.service import JobApplicationService, JobApplicationApprovalService
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue, PaymentUpdate, AdminRevenue
 from app.core.auth import get_current_worker_id, get_current_admin_id
 
 router = APIRouter(
@@ -84,6 +84,32 @@ def get_worker_revenue(
         return ok(data=revenue, message="Worker Revenue Found Successfully")
     except Exception as e:
         return fail(message=str(e))
+    
+# Get Pending Payment (Admin Revenue) --- ADMIN PANEL ---
+@router.get("/admin/revenue", response_model=APIResponse[AdminRevenue])
+def get_pending_payment(
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(get_current_admin_id),
+):
+    """Get admin's pending payment revenue with list of workers awaiting payment."""
+    try:
+        revenue = JobApplicationService(db).get_pending_payment(admin_id)
+        return ok(data=revenue, message="Pending Payment Found Successfully")
+    except Exception as e:
+        return fail(message=str(e))
+
+# @router.update("/admin/revenue", response_model=APIResponse[List[AdminRevenue]])
+# def update_payment_status(
+#     payload: PaymentUpdate,
+#     db: Session = Depends(get_db),
+#     admin_id: int = Depends(get_current_admin_id),
+# ):
+#     """Update payment status."""
+#     try:
+#         revenue = JobApplicationService(db).update_payment_status(admin_id, payload)
+#         return ok(data=revenue, message="Payment Status Updated Successfully")
+#     except Exception as e:
+#         return fail(message=str(e))
     
 # Update Job Application --- WORKER PANEL ---
 @router.put("/{job_application_id}", response_model=APIResponse[JobApplicationRead])

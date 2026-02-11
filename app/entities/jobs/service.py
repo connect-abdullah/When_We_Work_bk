@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, case
 from app.entities.jobs.schema import JobCreate, JobRead, JobStats, JobUpdate
 from app.entities.jobs.model import Job, JobStatus
-from app.entities.job_application.model import WorkStatus
+from app.entities.job_application.model import WorkStatus, PaymentStatus
 from app.entities.job_application.model import JobApplication
 from app.core.logging import get_logger
 
@@ -55,7 +55,7 @@ class JobService:
                 for key, value in payload.model_dump().items():
                     setattr(job, key, value)
                 if payload.status == JobStatus.completed:
-                    self.db.query(JobApplication).filter(JobApplication.job_id == job_id).update({JobApplication.work_status: WorkStatus.completed})
+                    self.db.query(JobApplication).filter(JobApplication.job_id == job_id).update({JobApplication.work_status: WorkStatus.completed, JobApplication.payment_status: PaymentStatus.pending})
                 self.db.commit()
                 self.db.refresh(job)
                 return JobRead.model_validate(job)

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue, Revenue
-from app.entities.job_application.model import JobApplication, JobApplicationStatus, WorkStatus
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue, Revenue, AdminRevenue, PendingRevenue
+from app.entities.job_application.model import JobApplication, JobApplicationStatus, WorkStatus, PaymentStatus
+from app.entities.jobs.model import Job
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -98,6 +99,46 @@ class JobApplicationService:
             logger.error(f"Error getting worker revenue: {str(e)}")
             raise
         
+    def get_pending_payment(self, admin_id: int) -> AdminRevenue:
+        try:
+            # Use join to filter by admin_id through the Job relationship
+            job_applications = (
+                self.db.query(JobApplication)
+                .join(Job, JobApplication.job_id == Job.id)
+                .filter(
+                    Job.admin_id == admin_id,
+                    JobApplication.payment_status == PaymentStatus.pending
+                )
+                .options(joinedload(JobApplication.job), joinedload(JobApplication.user))
+                .all()
+            )
+            
+            # Calculate total pending payment
+            pending_payment = sum(ja.job.salary for ja in job_applications)
+            
+            # Build list of pending revenue items
+            jobs = [
+                PendingRevenue(
+                    job_id=ja.job_id,
+                    job_name=ja.job.title,
+                    salary=ja.job.salary,
+                    from_date_time=ja.job.from_date_time,
+                    to_date_time=ja.job.to_date_time,
+                    worker_id=ja.worker_id,
+                    worker_name=f"{ja.user.first_name} {ja.user.last_name}",
+                    worker_email=ja.user.email,
+                    payment_status=ja.payment_status
+                )
+                for ja in job_applications
+            ]
+            
+            return AdminRevenue(
+                pending_payment=pending_payment,
+                jobs=jobs
+            )
+        except Exception as e:
+            logger.error(f"Error getting pending payment: {str(e)}")
+            raise
 
 # Approve Job application approval by admin
 class JobApplicationApprovalService:
