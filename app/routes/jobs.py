@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
-from app.core.auth import get_current_admin_id, get_admin_id_for_jobs
+from app.core.auth import get_current_admin_id, get_admin_id_for_jobs, get_current_worker_id
 from app.entities.jobs.service import JobService
 from app.entities.jobs.schema import JobCreate, JobRead, JobUpdate, JobStats
 from app.core.logging import get_logger

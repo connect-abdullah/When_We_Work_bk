@@ -1,5 +1,6 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
-from app.entities.job_application.model import JobApplicationStatus
+from app.entities.job_application.model import JobApplicationStatus, WorkStatus
 from app.entities.user.schema import Gender, EmploymentType
 from app.entities.jobs.schema import JobBase, JobRead
 
@@ -8,6 +9,7 @@ class JobApplicationBase(BaseModel):
     
     job_id: int
     approved_status: JobApplicationStatus = JobApplicationStatus.applied
+    work_status: WorkStatus = WorkStatus.pending
     
 class JobApplicationCreate(JobApplicationBase):
     pass
@@ -37,3 +39,16 @@ class JobApplicationWorkerStatus(BaseModel):
     approved_status: JobApplicationStatus
     job_details: JobRead
     model_config = ConfigDict(use_enum_values=True)
+    
+class Revenue(BaseModel):
+    job_id: int
+    job_name: str
+    salary: float
+    from_date_time: datetime | None = None
+    to_date_time: datetime | None = None
+    model_config = ConfigDict(use_enum_values=True) 
+    
+class WorkerRevenue(BaseModel):
+    total_salary: float
+    jobs: list[Revenue]
+    model_config = ConfigDict(use_enum_values=True) 

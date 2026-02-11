@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus
-from app.entities.job_application.model import JobApplication, JobApplicationStatus
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue, Revenue
+from app.entities.job_application.model import JobApplication, JobApplicationStatus, WorkStatus
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -67,6 +67,36 @@ class JobApplicationService:
             return None
         except Exception as e:
             logger.error(f"Error updating a job application: {str(e)}")
+            
+    def get_worker_revenue(self, worker_id: int) -> list[WorkerRevenue]:
+        try:
+            job_applications = (
+                self.db.query(JobApplication)
+                .filter(
+                    JobApplication.worker_id == worker_id,
+                    JobApplication.work_status == WorkStatus.completed
+                )
+                .all()
+            )
+            return [
+                WorkerRevenue(
+                    total_salary=sum(ja.job.salary for ja in job_applications),
+                    jobs=[
+                        Revenue(
+                            job_id=ja.job_id,
+                            job_name=ja.job.title,
+                            salary=ja.job.salary,
+                            from_date_time=ja.job.from_date_time,
+                            to_date_time=ja.job.to_date_time
+                        )
+                        for ja in job_applications
+                    ]
+                )
+                for ja in job_applications
+            ]
+        except Exception as e:
+            logger.error(f"Error getting worker revenue: {str(e)}")
+            raise
         
 
 # Approve Job application approval by admin
@@ -79,6 +109,7 @@ class JobApplicationApprovalService:
             job_application = self.db.query(JobApplication).filter(JobApplication.id == payload.id and JobApplication.worker_id == payload.worker_id).first()
             if job_application:
                 job_application.approved_status = payload.approved_status
+                job_application.work_status = WorkStatus.assigned
                 # Initialize workers_hired to 0 if it's None
                 if job_application.job.workers_hired is None:
                     job_application.job.workers_hired = 0

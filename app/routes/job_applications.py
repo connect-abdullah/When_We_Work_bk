@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.job_application.service import JobApplicationService, JobApplicationApprovalService
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue
 from app.core.auth import get_current_worker_id, get_current_admin_id
 
 router = APIRouter(
@@ -69,6 +69,19 @@ def get_all_job_applications(db:Session = Depends(get_db), worker_id: int = Depe
     try:
         all_job_applications = JobApplicationService(db).get_all_job_applications(worker_id=worker_id)
         return ok(data=all_job_applications, message="All Job Applications Found Successfully")
+    except Exception as e:
+        return fail(message=str(e))
+    
+# Get Worker Revenue --- WORKER PANEL ---
+@router.get("/worker/revenue", response_model=APIResponse[List[WorkerRevenue]])
+def get_worker_revenue(
+    db: Session = Depends(get_db),
+    worker_id: int = Depends(get_current_worker_id),
+):
+    """Get worker revenue."""
+    try:
+        revenue = JobApplicationService(db).get_worker_revenue(worker_id)
+        return ok(data=revenue, message="Worker Revenue Found Successfully")
     except Exception as e:
         return fail(message=str(e))
     

@@ -11,12 +11,18 @@ class JobApplicationStatus(str, Enum):
     approved = "approved"
     rejected = "rejected"
 
+class WorkStatus(str, Enum):
+    pending = "pending"
+    assigned = "assigned"
+    completed = "completed"
+
 class JobApplication(Base, BaseModel):
     __tablename__ = "job_applications"
     
     job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
     worker_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_status = Column(SQLAEnum(JobApplicationStatus), nullable=False)
+    work_status = Column(SQLAEnum(WorkStatus), nullable=True)
     
     # relationship for easy data access and retrieval
     job = relationship("Job", backref="job_applications")  # backref automatically creates job.job_applications
