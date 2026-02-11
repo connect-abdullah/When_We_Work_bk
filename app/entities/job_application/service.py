@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, WorkerRevenue, Revenue, AdminRevenue, PendingRevenue
+from app.entities.job_application.schema import JobApplicationCreate, JobApplicationRead, JobApplicationUpdate, JobApproval, JobApplicationWorkerStatus, Revenue, PendingRevenue, PaymentUpdate
 from app.entities.job_application.model import JobApplication, JobApplicationStatus, WorkStatus, PaymentStatus
 from app.entities.jobs.model import Job
 from app.core.logging import get_logger
@@ -69,7 +69,7 @@ class JobApplicationService:
         except Exception as e:
             logger.error(f"Error updating a job application: {str(e)}")
             
-    def get_worker_revenue(self, worker_id: int) -> list[WorkerRevenue]:
+    def get_worker_revenue(self, worker_id: int) -> list[Revenue]:
         try:
             job_applications = (
                 self.db.query(JobApplication)
@@ -79,19 +79,15 @@ class JobApplicationService:
                 )
                 .all()
             )
+         
             return [
-                WorkerRevenue(
-                    total_salary=sum(ja.job.salary for ja in job_applications),
-                    jobs=[
-                        Revenue(
-                            job_id=ja.job_id,
-                            job_name=ja.job.title,
-                            salary=ja.job.salary,
-                            from_date_time=ja.job.from_date_time,
-                            to_date_time=ja.job.to_date_time
-                        )
-                        for ja in job_applications
-                    ]
+                Revenue(
+                    job_id=ja.job_id,
+                    job_name=ja.job.title,
+                    salary=ja.job.salary,
+                    from_date_time=ja.job.from_date_time,
+                    to_date_time=ja.job.to_date_time,
+                    payment_status=ja.payment_status
                 )
                 for ja in job_applications
             ]
@@ -99,7 +95,7 @@ class JobApplicationService:
             logger.error(f"Error getting worker revenue: {str(e)}")
             raise
         
-    def get_pending_payment(self, admin_id: int) -> AdminRevenue:
+    def get_pending_payment(self, admin_id: int) -> PendingRevenue:
         try:
             # Use join to filter by admin_id through the Job relationship
             job_applications = (
@@ -113,11 +109,7 @@ class JobApplicationService:
                 .all()
             )
             
-            # Calculate total pending payment
-            pending_payment = sum(ja.job.salary for ja in job_applications)
-            
-            # Build list of pending revenue items
-            jobs = [
+            return [
                 PendingRevenue(
                     job_id=ja.job_id,
                     job_name=ja.job.title,
@@ -132,12 +124,21 @@ class JobApplicationService:
                 for ja in job_applications
             ]
             
-            return AdminRevenue(
-                pending_payment=pending_payment,
-                jobs=jobs
-            )
         except Exception as e:
             logger.error(f"Error getting pending payment: {str(e)}")
+            raise
+        
+    def update_payment_status(self, payload: PaymentUpdate) -> bool:
+        try:
+            job_application = self.db.query(JobApplication).filter(JobApplication.job_id == payload.job_id, JobApplication.worker_id == payload.worker_id).first()
+            if job_application:
+                job_application.payment_status = payload.payment_status
+                self.db.commit()
+                self.db.refresh(job_application)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error updating payment status: {str(e)}")
             raise
 
 # Approve Job application approval by admin

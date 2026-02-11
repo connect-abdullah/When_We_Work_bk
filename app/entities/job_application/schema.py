@@ -61,13 +61,3 @@ class PaymentUpdate(BaseModel):
     worker_id: int
     payment_status: PaymentStatus
     model_config = ConfigDict(use_enum_values=True) 
-
-class WorkerRevenue(BaseModel):
-    total_salary: float
-    jobs: list[Revenue]
-    model_config = ConfigDict(use_enum_values=True) 
-    
-class AdminRevenue(BaseModel):
-    pending_payment: float
-    jobs: list[PendingRevenue]
-    model_config = ConfigDict(use_enum_values=True) 
