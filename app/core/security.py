@@ -18,6 +18,9 @@ context = CryptContext(
 def generate_random_password(length: int) -> str:
     return secrets.token_urlsafe(length) # password like NuO5pUBw1J_-tfWTjB2e
 
+def generate_random_otp(length: int) -> str:
+    return str(secrets.randbelow(10**length)) # otp like 123456 (length = 6)
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
     return context.verify(plain_password, hashed_password)
@@ -100,6 +103,7 @@ def verify_token(token: str) -> dict:
     
 export_functions = {
     "generate_random_password": generate_random_password,
+    "generate_random_otp": generate_random_otp,
     "verify_password": verify_password,
     "get_password_hash": get_password_hash,
     "create_token": create_token,

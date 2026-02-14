@@ -1,21 +1,44 @@
-from this import d
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.response import APIResponse, ok, fail
 from app.entities.business.service import BusinessService
-from app.entities.business.schema import BusinessCreate, BusinessRead, BusinessUpdate
+from app.entities.business.schema import BusinessCreate, BusinessRead, BusinessUpdate, VerifyBusinessRegister
 
 router = APIRouter(
-    prefix = "/business",
-    tags = ["Business"]
+    prefix="/business",
+    tags=["Business"],
 )
 
-# Create Business
+# Step 1: Submit business details → OTP sent to business email (business not created yet)
+@router.post("/request-registration", response_model=APIResponse[dict])
+def request_business_registration(business: BusinessCreate, db: Session = Depends(get_db)):
+    """Submit business details. OTP is sent to the business email. Call verify-and-register with the OTP to complete registration."""
+    try:
+        BusinessService(db).request_registration(business)
+        return ok(data={"message": "OTP sent to business email"}, message="OTP sent successfully")
+    except HTTPException:
+        raise
+    except Exception as e:
+        return fail(message=str(e))
+
+# Step 2: Submit OTP → verify; only then create business
+@router.post("/verify-and-register", response_model=APIResponse[BusinessRead])
+def verify_and_register(payload: VerifyBusinessRegister, db: Session = Depends(get_db)):
+    """Verify OTP and complete business registration. Business is created only if OTP is correct."""
+    try:
+        new_business = BusinessService(db).verify_and_register(payload.email, payload.otp)
+        return ok(data=new_business, message="Business registered successfully")
+    except HTTPException:
+        raise
+    except Exception as e:
+        return fail(message=str(e))
+
+# Direct create (no OTP) – e.g. for internal/admin use
 @router.post("", response_model=APIResponse[BusinessRead])
 def create_business(business: BusinessCreate, db: Session = Depends(get_db)):
-    """ Create a business """
+    """Create a business directly without OTP (e.g. internal use). For normal flow use request-registration then verify-and-register."""
     try:
         new_business = BusinessService(db).create_business(business)
         return ok(data=new_business, message="Business Created Successfully!")

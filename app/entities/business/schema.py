@@ -17,6 +17,13 @@ class BusinessBase(BaseModel):
 class BusinessCreate(BusinessBase):
     pass
 
+
+class VerifyBusinessRegister(BaseModel):
+    """Payload for verifying OTP and completing business registration."""
+    email: str
+    otp: str
+
+
 class BusinessRead(BusinessBase):
     id: int
     

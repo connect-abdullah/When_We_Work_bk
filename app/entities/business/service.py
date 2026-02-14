@@ -1,15 +1,60 @@
+from fastapi import HTTPException, status
+
 from sqlalchemy.orm import Session
 from app.entities.business.schema import BusinessCreate, BusinessRead, BusinessUpdate
 from app.entities.business.model import Business
 from app.core.logging import get_logger
+from app.core.security import generate_random_otp
+from app.core.email import EmailService
+from app.core.pending_registration import set_pending, pop_pending
 
 logger = get_logger(__name__)
+
 
 class BusinessService:
     def __init__(self, db: Session) -> None:
         self.db = db
-        
-    # Create a business
+        self.email_service = EmailService()
+
+    # Request registration: send OTP to business email, store pending. Do NOT create business yet.
+    def request_registration(self, payload: BusinessCreate) -> None:
+        email = payload.email.strip().lower()
+        if self.db.query(Business).filter(Business.email == email).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A business with this email is already registered.",
+            )
+        otp = generate_random_otp(6)
+        self.email_service.send_email(
+            payload.email,
+            "Your OTP for WhenWeWork Business Registration",
+            f"Your verification code is: {otp}. It expires in 10 minutes.",
+        )
+        set_pending(email, otp, payload.model_dump())
+
+    # Verify OTP and only then create the business.
+    def verify_and_register(self, email: str, otp: str) -> BusinessRead:
+        key = email.strip().lower()
+        entry = pop_pending(key)
+        if not entry:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired OTP. Please request a new code.",
+            )
+        if entry["otp"] != otp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect OTP.",
+            )
+        payload = BusinessCreate.model_validate(entry["payload"])
+        if self.db.query(Business).filter(Business.email == key).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A business with this email is already registered.",
+            )
+        return self.create_business(payload)
+
+    # Create a business (used after OTP verification or direct create)
     def create_business(self, payload: BusinessCreate) -> BusinessRead:
         try:
             business = Business(**payload.model_dump())

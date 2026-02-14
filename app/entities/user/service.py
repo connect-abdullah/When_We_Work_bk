@@ -3,7 +3,7 @@ from app.entities.user.modal import User, UserRoleEnum as UserUserRoleEnum
 from app.entities.user.schema import ForgotPassword, UserCreate, UserRead, UserCreateResponse, UserUpdate, UserLogin, UserTokenResponse
 from app.core.logging import get_logger
 from app.core.email import EmailService
-from app.core.security import get_password_hash, generate_random_password, verify_password, create_token
+from app.core.security import generate_random_otp, get_password_hash, generate_random_password, verify_password, create_token
 from email_validator import validate_email, EmailNotValidError
 from fastapi import HTTPException
 from datetime import datetime, timezone
@@ -142,3 +142,25 @@ class UserService:
         except Exception as e:
             logger.error(f"Error during forgot password for {payload.email}: {str(e)}")
             raise HTTPException(status_code=500, detail="Unable to reset password at this time.")
+        
+    def send_otp(self, email: str) -> bool:
+        try:
+            otp = generate_random_otp(6)
+            self.email_service.send_email(email, "Your OTP for WhenWeWork", "Your OTP is: " + otp)
+            return True
+        except Exception as e:
+            logger.error(f"Error during sending OTP to {email}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Unable to send OTP at this time.")
+    
+    def verify_otp(self, email: str, otp: str) -> bool:
+        try:
+            user = self.db.query(User).filter(User.email == email).first()
+            if not user:
+                return False
+            if user.otp != otp:
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Error during verifying OTP for {email}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Unable to verify OTP at this time.")
+            
