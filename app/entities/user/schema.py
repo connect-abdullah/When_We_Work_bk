@@ -14,7 +14,7 @@ class UserBase(BaseModel):
     availability: bool = True
     employment_type: EmploymentType | None = None
 
-    user_role: UserRoleEnum
+    user_role: UserRoleEnum | None = None
     worker_roles: list[str] | None = None # worker roles are the roles that the user can perform
     remarks: str | None = None
     
@@ -84,3 +84,6 @@ class UserTokenResponse(BaseModel):
     last_login_at: datetime | None = None
     access_token: str
     token_type: str
+    
+class ForgotPassword(BaseModel):
+    email: str

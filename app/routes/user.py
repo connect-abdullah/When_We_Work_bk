@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.entities.user.service import UserService
-from app.entities.user.schema import UserCreate, UserRead, UserCreateResponse, UserUpdate, UserUpdateByWorker, UserUpdateByAdmin, UserLogin, UserTokenResponse
+from app.entities.user.schema import ForgotPassword, UserCreate, UserRead, UserCreateResponse, UserUpdate, UserUpdateByWorker, UserUpdateByAdmin, UserLogin, UserTokenResponse
 from app.core.response import APIResponse, ok, fail
 from app.core.auth import get_current_admin_id, get_current_admin_id_optional, get_current_worker_id
 from app.db.session import get_db
@@ -54,7 +54,7 @@ def get_all_users(db: Session = Depends(get_db), admin_id: int = Depends(get_cur
     except Exception as e:
         return fail(message=str(e))
     
-# Update User by Admin (can change everything including email and user_role)
+# Update User by Admin (can change everything including email and user_role) || Also Change Admin Data
 @router.put("/admin/{user_id}", response_model=APIResponse[UserRead])
 def update_user_by_admin(
     user_id: int, 
@@ -67,6 +67,7 @@ def update_user_by_admin(
     - email
     - user_role
     - All other user fields
+    - Also Change Admin Data
     """
     try:
         updated_user = UserService(db).update_user(user_id=user_id, payload=user)
@@ -128,3 +129,11 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     except Exception as e:
         return fail(message=str(e))
     
+@router.post("/forgot-password", response_model=APIResponse[bool])
+def forgot_password(payload: ForgotPassword, db:Session = Depends(get_db)):
+    """ Forget Password """
+    try:
+        response = UserService(db).reset_password(payload)
+        return ok(data=response, message="Password successfully sent to email")
+    except Exception as e:
+        return fail(message=str(e))

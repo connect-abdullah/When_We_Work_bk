@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.entities.user.modal import User, UserRoleEnum as UserUserRoleEnum
-from app.entities.user.schema import UserCreate, UserRead, UserCreateResponse, UserUpdate, UserLogin, UserTokenResponse
+from app.entities.user.schema import ForgotPassword, UserCreate, UserRead, UserCreateResponse, UserUpdate, UserLogin, UserTokenResponse
 from app.core.logging import get_logger
 from app.core.email import EmailService
 from app.core.security import get_password_hash, generate_random_password, verify_password, create_token
@@ -30,7 +30,7 @@ class UserService:
             "Your password is: " + random_password,
         )
         return hashed
-
+    
     def check_user_email_exists(self, email: str) -> bool:
         already_exists = self.db.query(User).filter(User.email == email).first()
         return already_exists is not None
@@ -127,3 +127,18 @@ class UserService:
         except Exception as e:
             logger.error(f"Error logging in user: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
+        
+        
+    def reset_password(self, payload: ForgotPassword) -> bool:
+        try:
+            user = self.db.query(User).filter(User.email == payload.email).first()
+            if not user:
+                return False
+            new_password = self._send_user_email_with_password(payload.email)
+            user.password = new_password
+            self.db.commit()
+            self.db.refresh(user)
+            return True
+        except Exception as e:
+            logger.error(f"Error during forgot password for {payload.email}: {str(e)}")
+            raise HTTPException(status_code=500, detail="Unable to reset password at this time.")
